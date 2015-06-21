@@ -14,21 +14,26 @@ import java.util.stream.Stream;
 
 public class TilesGroup {
 
-    private double width;
-    private double height;
-    private double tileSize;
+    private final double width;
+    private final double height;
+    private final double tileSize;
+    private final List<Image> tiles;
 
-    public TilesGroup(double width, double height, double tileSize) {
+    public TilesGroup(double width, double height, List<Image> tiles) {
         this.width = width;
         this.height = height;
-        this.tileSize = tileSize;
+        this.tiles = tiles;
+        if (!tiles.isEmpty()) {
+            this.tileSize = tiles.get(0).getHeight();
+        } else {
+            this.tileSize = 0.0;
+        }
     }
 
-    public Group getTilesGroup(List<Image> tiles) {
+    public Group getTilesGroup() {
         Group root = new Group();
         if (tiles.isEmpty()) return root;
 
-        tileSize = tiles.get(0).getWidth();
         final Random[] random = {new Random()};
         Deque<Image> imagesRepo = randomizeTiles(
                 () -> tiles.get(random[0].nextInt(tiles.size()))
@@ -37,17 +42,11 @@ public class TilesGroup {
         return root;
     }
 
-    public void resizeAndExport(String width, String height) {
-        this.setWidth(Double.valueOf(width));
-        this.setHeight(Double.valueOf(height));
-    }
-
     private Deque<Image> randomizeTiles(Supplier<Image> supplier) {
         double limit = Math.pow(getTotalWidth() + getTotalHeight(), 2) / Math.pow(tileSize, 2);
         Stream<Image> imageStream = Stream.generate(supplier).limit((long) limit);
         return imageStream.collect(Collectors.toCollection(ArrayDeque<Image>::new));
     }
-
 
     private Group arrangeTiles(Deque<Image> imagesRepo) {
         Group tilesGroup = new Group();
@@ -65,20 +64,18 @@ public class TilesGroup {
         return tilesGroup;
     }
 
+
+    public TilesGroup resizeAndExport(String width, String height, List<Image> tiles) {
+        Double newWidth = Double.valueOf(width);
+        Double newHeight = Double.valueOf(height);
+        return new TilesGroup(newWidth, newHeight, tiles);
+    }
+
     private double getTotalHeight() {
         return (height * tileSize);
     }
 
     private double getTotalWidth() {
         return (width * tileSize);
-    }
-
-
-    public void setWidth(double width) {
-        this.width = width;
-    }
-
-    public void setHeight(double height) {
-        this.height = height;
     }
 }

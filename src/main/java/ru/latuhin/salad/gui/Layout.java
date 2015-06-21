@@ -1,6 +1,7 @@
 package ru.latuhin.salad.gui;
 
 import javafx.application.Application;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -36,11 +37,10 @@ public class Layout extends Application {
         borderPane.setPrefWidth(500);
         borderPane.setPrefHeight(500);
 
-        int width = 4;
-        int height = 4;
-        int tileSize = 50;
-        TilesGroup group = new TilesGroup(width, height, tileSize);
-        borderPane.setCenter(group.getTilesGroup(tiles));
+        double width = 4.0;
+        double height = 4.0;
+        TilesGroup group = new TilesGroup(width, height, tiles);
+        borderPane.setCenter(group.getTilesGroup());
 
         Label widthLabel = new Label("Width");
         TextField widthTextField = new TextField(String.valueOf(width));
@@ -55,7 +55,6 @@ public class Layout extends Application {
         fileChooserButton.setOnAction(e -> {
             List<File> list = fileChooser.showOpenMultipleDialog(primaryStage);
             if (list != null && !list.isEmpty()) {
-                tiles.clear();
                 lastLoadedTiles.clear();
 
                 for (File file : list) {
@@ -68,11 +67,7 @@ public class Layout extends Application {
         });
 
         Button redrawButton = new Button("Redraw");
-        redrawButton.setOnAction(e -> {
-            tiles.clear();
-            redrawTiles(borderPane, group, widthTextField, heightTextField);
-
-        });
+        redrawButton.setOnAction(e -> redrawTiles(borderPane, group, widthTextField, heightTextField));
 
         VBox vBox = new VBox();
         vBox.getChildren().add(fileChooserButton);
@@ -89,6 +84,7 @@ public class Layout extends Application {
     }
 
     private void redrawTiles(BorderPane borderPane, TilesGroup group, TextField widthTextField, TextField heightTextField) {
+        tiles.clear();
         for (Path path : lastLoadedTiles) {
             try {
                 getTilesFromPath(path);
@@ -96,8 +92,8 @@ public class Layout extends Application {
                 e1.printStackTrace();
             }
         }
-        group.resizeAndExport(widthTextField.getText(), heightTextField.getText());
-        borderPane.setCenter(group.getTilesGroup(tiles));
+        Group fxGroup = group.resizeAndExport(widthTextField.getText(), heightTextField.getText(), tiles).getTilesGroup();
+        borderPane.setCenter(fxGroup);
     }
 
     private void getTilesFromPath(Path path) throws IOException {
