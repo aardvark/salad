@@ -12,14 +12,14 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TilesGroup {
+class TilesGroup {
 
-    private final double width;
-    private final double height;
+    private final int width;
+    private final int height;
     private final double tileSize;
     private final List<Image> tiles;
 
-    public TilesGroup(double width, double height, List<Image> tiles) {
+    TilesGroup(int width, int height, List<Image> tiles) {
         this.width = width;
         this.height = height;
         this.tiles = tiles;
@@ -30,7 +30,7 @@ public class TilesGroup {
         }
     }
 
-    public Group getTilesGroup() {
+    Group recreateTilesGroup() {
         Group root = new Group();
         if (tiles.isEmpty()) return root;
 
@@ -43,8 +43,8 @@ public class TilesGroup {
     }
 
     private Deque<Image> randomizeTiles(Supplier<Image> supplier) {
-        double limit = Math.pow(getTotalWidth() + getTotalHeight(), 2) / Math.pow(tileSize, 2);
-        Stream<Image> imageStream = Stream.generate(supplier).limit((long) limit);
+        long limit = (long) (Math.pow(getTotalWidth() + getTotalHeight(), 2) / Math.pow(tileSize, 2));
+        Stream<Image> imageStream = Stream.generate(supplier).limit(limit);
         return imageStream.collect(Collectors.toCollection(ArrayDeque<Image>::new));
     }
 
@@ -65,9 +65,9 @@ public class TilesGroup {
     }
 
 
-    public TilesGroup resizeAndExport(String width, String height, List<Image> tiles) {
-        Double newWidth = Double.valueOf(width);
-        Double newHeight = Double.valueOf(height);
+    TilesGroup resizeAndExport(String width, String height, List<Image> tiles) {
+        int newWidth = Integer.valueOf(width);
+        int newHeight = Integer.valueOf(height);
         return new TilesGroup(newWidth, newHeight, tiles);
     }
 

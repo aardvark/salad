@@ -39,17 +39,17 @@ public class Layout extends Application {
         borderPane.setPrefWidth(500);
         borderPane.setPrefHeight(500);
 
-        double width = 4.0;
-        double height = 4.0;
+        int width = 4;
+        int height = 4;
         TilesGroup group = new TilesGroup(width, height, tiles);
-        borderPane.setCenter(group.getTilesGroup());
+        borderPane.setCenter(group.recreateTilesGroup());
 
         Label widthLabel = new Label("Width");
-        TextField widthTextField = new TextField(String.valueOf((int) width));
+        TextField widthTextField = new TextField(String.valueOf(width));
         widthTextField.setPrefWidth(50);
 
         Label heightLabel = new Label("Height");
-        TextField heightTextField = new TextField(String.valueOf((int) height));
+        TextField heightTextField = new TextField(String.valueOf(height));
         heightTextField.setPrefWidth(50);
 
         final FileChooser fileChooser = new FileChooser();
@@ -97,18 +97,14 @@ public class Layout extends Application {
         tiles.clear();
         for (Path path : lastLoadedTiles) {
             try {
-                getTilesFromPath(path);
+                InputStream is = Files.newInputStream(path, StandardOpenOption.READ);
+                tiles.add(new Image(is));
+                is.close();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
         }
-        Group fxGroup = group.resizeAndExport(widthTextField.getText(), heightTextField.getText(), tiles).getTilesGroup();
+        Group fxGroup = group.resizeAndExport(widthTextField.getText(), heightTextField.getText(), tiles).recreateTilesGroup();
         borderPane.setCenter(fxGroup);
-    }
-
-    private void getTilesFromPath(Path path) throws IOException {
-        InputStream is = Files.newInputStream(path, StandardOpenOption.READ);
-        tiles.add(new Image(is));
-        is.close();
     }
 }
