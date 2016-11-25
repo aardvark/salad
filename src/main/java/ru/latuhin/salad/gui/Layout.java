@@ -1,6 +1,8 @@
 package ru.latuhin.salad.gui;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -51,7 +53,7 @@ public class Layout extends Application {
         heightTextField.setPrefWidth(50);
 
         final FileChooser fileChooser = new FileChooser();
-        Button fileChooserButton = new Button("Chose tiles");
+        Button fileChooserButton = new Button("Choose tiles");
         fileChooserButton.setOnAction(e -> {
             List<File> list = fileChooser.showOpenMultipleDialog(primaryStage);
             if (list != null && !list.isEmpty()) {
@@ -72,8 +74,10 @@ public class Layout extends Application {
         VBox vBox = new VBox();
         vBox.getChildren().add(fileChooserButton);
         vBox.getChildren().add(redrawButton);
-        vBox.getChildren().add(new HBox(widthLabel, widthTextField));
-        vBox.getChildren().add(new HBox(heightLabel, heightTextField));
+        vBox.getChildren().add(createBoxWith(widthLabel, widthTextField));
+        vBox.getChildren().add(createBoxWith(heightLabel, heightTextField));
+        vBox.setSpacing(5.0);
+        vBox.setPadding(new Insets(5.0));
 
         borderPane.setLeft(vBox);
 
@@ -81,6 +85,12 @@ public class Layout extends Application {
         primaryStage.setScene(scene);
         primaryStage.setTitle("Salad");
         primaryStage.show();
+    }
+
+    private HBox createBoxWith(Label label, TextField inputField) {
+        HBox widthLine = new HBox(5.0, label, inputField);
+        widthLine.setAlignment(Pos.CENTER);
+        return widthLine;
     }
 
     private void redrawTiles(BorderPane borderPane, TilesGroup group, TextField widthTextField, TextField heightTextField) {
