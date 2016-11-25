@@ -43,11 +43,11 @@ public class Layout extends Application {
         borderPane.setCenter(group.getTilesGroup());
 
         Label widthLabel = new Label("Width");
-        TextField widthTextField = new TextField(String.valueOf(width));
+        TextField widthTextField = new TextField(String.valueOf((int) width));
         widthTextField.setPrefWidth(50);
 
         Label heightLabel = new Label("Height");
-        TextField heightTextField = new TextField(String.valueOf(height));
+        TextField heightTextField = new TextField(String.valueOf((int) height));
         heightTextField.setPrefWidth(50);
 
         final FileChooser fileChooser = new FileChooser();
