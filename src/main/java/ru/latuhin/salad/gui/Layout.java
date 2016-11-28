@@ -1,10 +1,10 @@
 package ru.latuhin.salad.gui;
 
-import com.sun.javafx.tk.quantum.OverlayWarning;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import ru.latuhin.salad.tiles.TileMetadata;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +30,7 @@ public class Layout extends Application {
 
     private List<Image> tiles = new ArrayList<>();
     private List<Path> lastLoadedTiles = new ArrayList<>();
+    private List<TileMetadata> tileMetaDatas = new ArrayList<>();
 
     public static void main(String[] args) {
         launch(args);
@@ -55,6 +57,9 @@ public class Layout extends Application {
 
         final FileChooser fileChooser = new FileChooser();
         Button fileChooserButton = new Button("Choose tiles");
+
+        Label metaDataLabel = new Label(getMetaDataPath());
+
         fileChooserButton.setOnAction(e -> {
             List<File> list = fileChooser.showOpenMultipleDialog(primaryStage);
             if (list != null && !list.isEmpty()) {
@@ -65,19 +70,23 @@ public class Layout extends Application {
                     lastLoadedTiles.add(path);
                 }
 
-                redrawTiles(borderPane, inputColumnsField, inputRowsField);
+                redrawTiles(borderPane, inputColumnsField, inputRowsField, metaDataLabel);
             }
         });
 
         Button shuffle = new Button("Shuffle");
-        shuffle.setOnAction(e -> redrawTiles(borderPane, inputColumnsField, inputRowsField));
+        shuffle.setOnAction(e -> redrawTiles(borderPane, inputColumnsField, inputRowsField, metaDataLabel));
 
         VBox vBox = new VBox();
-        vBox.getChildren().add(fileChooserButton);
-        vBox.getChildren().add(new Label("Arrange tiles in:"));
-        vBox.getChildren().add(createBoxWith(rowsLabel, inputRowsField));
-        vBox.getChildren().add(createBoxWith(columnsLabel, inputColumnsField));
-        vBox.getChildren().add(shuffle);
+
+        List<Node> children = vBox.getChildren();
+        children.add(fileChooserButton);
+        children.add(metaDataLabel);
+        children.add(new Label("Arrange tiles in:"));
+        children.add(createBoxWith(rowsLabel, inputRowsField));
+        children.add(createBoxWith(columnsLabel, inputColumnsField));
+        children.add(shuffle);
+
         vBox.setSpacing(5.0);
         vBox.setPadding(new Insets(5.0));
 
@@ -95,18 +104,26 @@ public class Layout extends Application {
         return widthLine;
     }
 
-    private void redrawTiles(BorderPane borderPane, TextField columnsInput, TextField rowsInput) {
+    private void redrawTiles(BorderPane borderPane, TextField columnsInput, TextField rowsInput, Label metaDataLabel) {
         tiles.clear();
+        tileMetaDatas.clear();
         for (Path path : lastLoadedTiles) {
             try {
                 InputStream is = Files.newInputStream(path, StandardOpenOption.READ);
-                tiles.add(new Image(is));
+                Image image = new Image(is);
+                tiles.add(image);
+                tileMetaDatas.add(new TileMetadata(path, image));
                 is.close();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
         }
+        metaDataLabel.setText(getMetaDataPath());
         Group tileGroup = TilesGroup.resizeAndExport(columnsInput.getText(), rowsInput.getText(), tiles).recreateTilesGroup();
         borderPane.setCenter(tileGroup);
+    }
+
+    private String getMetaDataPath() {
+        return tileMetaDatas.isEmpty() ? "" : tileMetaDatas.get(0).getPath();
     }
 }
