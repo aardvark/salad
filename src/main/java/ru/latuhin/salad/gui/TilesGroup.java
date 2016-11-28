@@ -65,7 +65,7 @@ class TilesGroup {
     }
 
 
-    TilesGroup resizeAndExport(String width, String height, List<Image> tiles) {
+    static TilesGroup resizeAndExport(String width, String height, List<Image> tiles) {
         int newWidth = Integer.valueOf(width);
         int newHeight = Integer.valueOf(height);
         return new TilesGroup(newWidth, newHeight, tiles);

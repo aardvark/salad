@@ -1,5 +1,6 @@
 package ru.latuhin.salad.gui;
 
+import com.sun.javafx.tk.quantum.OverlayWarning;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -44,13 +45,13 @@ public class Layout extends Application {
         TilesGroup group = new TilesGroup(width, height, tiles);
         borderPane.setCenter(group.recreateTilesGroup());
 
-        Label widthLabel = new Label("Width");
-        TextField widthTextField = new TextField(String.valueOf(width));
-        widthTextField.setPrefWidth(50);
+        Label columnsLabel = new Label("Columns");
+        TextField inputColumnsField = new TextField(String.valueOf(width));
+        inputColumnsField.setPrefWidth(50);
 
-        Label heightLabel = new Label("Height");
-        TextField heightTextField = new TextField(String.valueOf(height));
-        heightTextField.setPrefWidth(50);
+        Label rowsLabel = new Label("Rows");
+        TextField inputRowsField = new TextField(String.valueOf(height));
+        inputRowsField.setPrefWidth(50);
 
         final FileChooser fileChooser = new FileChooser();
         Button fileChooserButton = new Button("Choose tiles");
@@ -64,18 +65,19 @@ public class Layout extends Application {
                     lastLoadedTiles.add(path);
                 }
 
-                redrawTiles(borderPane, group, widthTextField, heightTextField);
+                redrawTiles(borderPane, inputColumnsField, inputRowsField);
             }
         });
 
-        Button redrawButton = new Button("Redraw");
-        redrawButton.setOnAction(e -> redrawTiles(borderPane, group, widthTextField, heightTextField));
+        Button shuffle = new Button("Shuffle");
+        shuffle.setOnAction(e -> redrawTiles(borderPane, inputColumnsField, inputRowsField));
 
         VBox vBox = new VBox();
         vBox.getChildren().add(fileChooserButton);
-        vBox.getChildren().add(redrawButton);
-        vBox.getChildren().add(createBoxWith(widthLabel, widthTextField));
-        vBox.getChildren().add(createBoxWith(heightLabel, heightTextField));
+        vBox.getChildren().add(new Label("Arrange tiles in:"));
+        vBox.getChildren().add(createBoxWith(rowsLabel, inputRowsField));
+        vBox.getChildren().add(createBoxWith(columnsLabel, inputColumnsField));
+        vBox.getChildren().add(shuffle);
         vBox.setSpacing(5.0);
         vBox.setPadding(new Insets(5.0));
 
@@ -93,7 +95,7 @@ public class Layout extends Application {
         return widthLine;
     }
 
-    private void redrawTiles(BorderPane borderPane, TilesGroup group, TextField widthTextField, TextField heightTextField) {
+    private void redrawTiles(BorderPane borderPane, TextField columnsInput, TextField rowsInput) {
         tiles.clear();
         for (Path path : lastLoadedTiles) {
             try {
@@ -104,7 +106,7 @@ public class Layout extends Application {
                 e1.printStackTrace();
             }
         }
-        Group fxGroup = group.resizeAndExport(widthTextField.getText(), heightTextField.getText(), tiles).recreateTilesGroup();
-        borderPane.setCenter(fxGroup);
+        Group tileGroup = TilesGroup.resizeAndExport(columnsInput.getText(), rowsInput.getText(), tiles).recreateTilesGroup();
+        borderPane.setCenter(tileGroup);
     }
 }
