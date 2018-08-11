@@ -2,7 +2,6 @@ package ru.latuhin.salad.gui;
 
 import javafx.scene.Group;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -14,68 +13,58 @@ import java.util.stream.Stream;
 
 class TilesGroup {
 
-    private final int width;
-    private final int height;
-    private final double tileSize;
-    private final List<Image> tiles;
+  private final int width;
+  private final int height;
+  private final double tileSize;
+  private final List<Image> tiles;
 
-    TilesGroup(int width, int height, List<Image> tiles) {
-        this.width = width;
-        this.height = height;
-        this.tiles = tiles;
-        if (!tiles.isEmpty()) {
-            this.tileSize = tiles.get(0).getHeight();
-        } else {
-            this.tileSize = 0.0;
-        }
+  TilesGroup(int width, int height, List<Image> tiles) {
+    this.width = width;
+    this.height = height;
+    this.tiles = tiles;
+    if (!tiles.isEmpty()) {
+      this.tileSize = tiles.get(0).getHeight();
+    } else {
+      this.tileSize = 0.0;
     }
+  }
 
-    Group recreateTilesGroup() {
-        Group root = new Group();
-        if (tiles.isEmpty()) return root;
+  static TilesGroup resizeAndExport(String width, String height, List<Image> tiles) {
+    int newWidth = Integer.valueOf(width);
+    int newHeight = Integer.valueOf(height);
+    return new TilesGroup(newWidth, newHeight, tiles);
+  }
 
-        final Random[] random = {new Random()};
-        Deque<Image> imagesRepo = randomizeTiles(
-                () -> tiles.get(random[0].nextInt(tiles.size()))
-        );
-        root.getChildren().add(arrangeTiles(imagesRepo));
-        return root;
+  Group recreateTilesGroup(boolean useTransparency) {
+    Group root = new Group();
+    if (tiles.isEmpty()) return root;
+
+    final Random[] random = {new Random()};
+    Deque<Image> imagesRepo = randomizeTiles(() -> tiles.get(random[0].nextInt(tiles.size())));
+    root.getChildren().add(arrangeTilesGroup(imagesRepo, useTransparency));
+    return root;
+  }
+
+  private Group arrangeTilesGroup(Deque<Image> imagesRepo, boolean useTransparency) {
+    if (useTransparency) {
+      return new ByTransparentSideArranger(tileSize, height, width).arrangeTiles(imagesRepo);
+    } else {
+      return new BlockArranger(tileSize, height, width).arrangeTiles(imagesRepo);
     }
+  }
 
-    private Deque<Image> randomizeTiles(Supplier<Image> supplier) {
-        long limit = (long) (Math.pow(getTotalWidth() + getTotalHeight(), 2) / Math.pow(tileSize, 2));
-        Stream<Image> imageStream = Stream.generate(supplier).limit(limit);
-        return imageStream.collect(Collectors.toCollection(ArrayDeque<Image>::new));
-    }
+  private Deque<Image> randomizeTiles(Supplier<Image> supplier) {
+    long limit = (long) (Math.pow(getTotalWidth() + getTotalHeight(), 2) / Math.pow(tileSize, 2));
+    Stream<Image> imageStream = Stream.generate(supplier).limit(limit);
+    return imageStream.collect(Collectors.toCollection(ArrayDeque::new));
+  }
 
-    private Group arrangeTiles(Deque<Image> imagesRepo) {
-        Group tilesGroup = new Group();
-        for (double y = 0.0; y < getTotalHeight(); y = y + tileSize) {
-            for (double x = 0.0; x < getTotalWidth(); x = x + tileSize) {
-                ImageView imageView = new ImageView();
-                imageView.setImage(imagesRepo.pop());
-                imageView.setX(x);
-                imageView.setY(y);
-                imageView.setFitHeight(tileSize);
-                imageView.setFitWidth(tileSize);
-                tilesGroup.getChildren().add(imageView);
-            }
-        }
-        return tilesGroup;
-    }
+  private double getTotalHeight() {
+    return (height * tileSize);
+  }
 
+  private double getTotalWidth() {
+    return (width * tileSize);
+  }
 
-    static TilesGroup resizeAndExport(String width, String height, List<Image> tiles) {
-        int newWidth = Integer.valueOf(width);
-        int newHeight = Integer.valueOf(height);
-        return new TilesGroup(newWidth, newHeight, tiles);
-    }
-
-    private double getTotalHeight() {
-        return (height * tileSize);
-    }
-
-    private double getTotalWidth() {
-        return (width * tileSize);
-    }
 }
