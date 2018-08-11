@@ -1,6 +1,5 @@
 package ru.latuhin.salad.gui;
 
-import com.sun.javafx.tk.quantum.OverlayWarning;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -59,6 +58,7 @@ public class Layout extends Application {
             List<File> list = fileChooser.showOpenMultipleDialog(primaryStage);
             if (list != null && !list.isEmpty()) {
                 lastLoadedTiles.clear();
+                fileChooser.setInitialDirectory(list.get(0).getParentFile());
 
                 for (File file : list) {
                     Path path = file.toPath();
