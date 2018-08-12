@@ -70,12 +70,14 @@ public class Layout extends Application {
           lastLoadedTiles.add(path);
         }
 
-        redrawTiles(borderPane, inputColumnsField, inputRowsField, byTransparencySwitch.isSelected());
+        updateChildren(borderPane, inputColumnsField, inputRowsField, byTransparencySwitch);
       }
     });
 
     Button shuffle = new Button("Shuffle");
-    shuffle.setOnAction(e -> redrawTiles(borderPane, inputColumnsField, inputRowsField, byTransparencySwitch.isSelected()));
+    shuffle.setOnAction(e -> {
+      updateChildren(borderPane, inputColumnsField, inputRowsField, byTransparencySwitch);
+    });
 
 
     VBox vBox = new VBox();
@@ -96,13 +98,21 @@ public class Layout extends Application {
     primaryStage.show();
   }
 
+  private void updateChildren(BorderPane borderPane, TextField inputColumnsField, TextField inputRowsField,
+                              CheckBox byTransparencySwitch) {
+    Group newTilesGroup = redrawTiles(inputColumnsField, inputRowsField, byTransparencySwitch.isSelected());
+    Group center = (Group) borderPane.getCenter();
+    center.getChildren().clear();
+    center.getChildren().addAll(newTilesGroup.getChildren());
+  }
+
   private HBox createBoxWith(Label label, TextField inputField) {
     HBox widthLine = new HBox(5.0, label, inputField);
     widthLine.setAlignment(Pos.CENTER);
     return widthLine;
   }
 
-  private void redrawTiles(BorderPane borderPane, TextField columnsInput, TextField rowsInput, boolean selected) {
+  private Group redrawTiles(TextField columnsInput, TextField rowsInput, boolean selected) {
     tiles.clear();
     for (Path path : lastLoadedTiles) {
       try {
@@ -113,8 +123,6 @@ public class Layout extends Application {
         e1.printStackTrace();
       }
     }
-    Group tileGroup =
-      TilesGroup.resizeAndExport(columnsInput.getText(), rowsInput.getText(), tiles).recreateTilesGroup(selected);
-    borderPane.setCenter(tileGroup);
+    return TilesGroup.resizeAndExport(columnsInput.getText(), rowsInput.getText(), tiles).recreateTilesGroup(selected);
   }
 }
