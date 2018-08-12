@@ -47,10 +47,14 @@ public class Layout extends Application {
     TilesGroup group = new TilesGroup(width, height, tiles);
 
     List<Node> tiles = group.recreateTilesGroup(false);
-    Group centerGroup = new Group(tiles);
 
+    Group tileGroup = new Group(tiles);
 
-    borderPane.setCenter(centerGroup);
+    VBox centerBox = new VBox();
+    centerBox.getChildren().add(tileGroup);
+    centerBox.setStyle("-fx-border-color: black");
+    borderPane.setCenter(centerBox);
+
 
     Label columnsLabel = new Label("Columns");
     TextField inputColumnsField = new TextField(String.valueOf(width));
@@ -66,10 +70,10 @@ public class Layout extends Application {
     CheckBox byTransparencySwitch = new CheckBox("Merge tiles by transparency");
 
     //drag and drop
-    centerGroup.setOnDragOver(event -> {
+    centerBox.setOnDragOver(event -> {
       event.acceptTransferModes(TransferMode.ANY);
       List<File> files = event.getDragboard().getFiles();
-      updateOnFileChanged(centerGroup, files, inputColumnsField.getText(), inputRowsField.getText(),
+      updateOnFileChanged(tileGroup, files, inputColumnsField.getText(), inputRowsField.getText(),
         byTransparencySwitch.isSelected());
       event.consume();
     });
@@ -80,13 +84,13 @@ public class Layout extends Application {
       if (list != null && !list.isEmpty()) {
         fileChooser.setInitialDirectory(list.get(0).getParentFile());
       }
-      updateOnFileChanged(centerGroup, list, inputColumnsField.getText(), inputRowsField.getText(),
+      updateOnFileChanged(tileGroup, list, inputColumnsField.getText(), inputRowsField.getText(),
         byTransparencySwitch.isSelected());
     });
 
     Button shuffle = new Button("Shuffle");
     shuffle.setOnAction(e -> {
-      updateChildren(centerGroup, inputColumnsField.getText(), inputRowsField.getText(),
+      updateChildren(tileGroup, inputColumnsField.getText(), inputRowsField.getText(),
         byTransparencySwitch.isSelected());
     });
 
