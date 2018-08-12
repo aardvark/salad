@@ -1,12 +1,14 @@
 package ru.latuhin.salad.gui;
 
-import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 
 class ByTransparentSideArranger implements TileArranger {
   private final double tileSize;
@@ -24,8 +26,8 @@ class ByTransparentSideArranger implements TileArranger {
   }
 
   @Override
-  public Group arrangeTiles(Deque<Image> imagesRepo) {
-    Group tilesGroup = new Group();
+  public List<Node> arrangeTiles(Deque<Image> imagesRepo) {
+    List<Node> images = new ArrayList<>();
     double xStart = 0.0;
     int[] shifts = findShifts(imagesRepo.peekFirst());
     Number xShift = shifts[0];
@@ -39,11 +41,11 @@ class ByTransparentSideArranger implements TileArranger {
         imageView.setY(y);
         imageView.setFitHeight(tileSize);
         imageView.setFitWidth(tileSize);
-        tilesGroup.getChildren().add(imageView);
+        images.add(imageView);
       }
       xStart = xStart == 0.0 ? xShift.doubleValue() : 0.0;
     }
-    return tilesGroup;
+    return images;
   }
 
   /**

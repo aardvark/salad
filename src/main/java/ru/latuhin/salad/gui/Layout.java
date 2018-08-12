@@ -4,12 +4,14 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -35,7 +37,7 @@ public class Layout extends Application {
   }
 
   @Override
-  public void start(Stage primaryStage) throws Exception {
+  public void start(Stage primaryStage) {
     BorderPane borderPane = new BorderPane();
     borderPane.setPrefWidth(500);
     borderPane.setPrefHeight(500);
@@ -43,7 +45,12 @@ public class Layout extends Application {
     int width = 4;
     int height = 4;
     TilesGroup group = new TilesGroup(width, height, tiles);
-    borderPane.setCenter(group.recreateTilesGroup(false));
+
+    List<Node> tiles = group.recreateTilesGroup(false);
+    Group centerGroup = new Group(tiles);
+
+
+    borderPane.setCenter(centerGroup);
 
     Label columnsLabel = new Label("Columns");
     TextField inputColumnsField = new TextField(String.valueOf(width));
@@ -58,25 +65,29 @@ public class Layout extends Application {
 
     CheckBox byTransparencySwitch = new CheckBox("Merge tiles by transparency");
 
+    //drag and drop
+    centerGroup.setOnDragOver(event -> {
+      event.acceptTransferModes(TransferMode.ANY);
+      List<File> files = event.getDragboard().getFiles();
+      updateOnFileChanged(centerGroup, files, inputColumnsField.getText(), inputRowsField.getText(),
+        byTransparencySwitch.isSelected());
+      event.consume();
+    });
+
     /* logic */
     fileChooserButton.setOnAction(e -> {
       List<File> list = fileChooser.showOpenMultipleDialog(primaryStage);
       if (list != null && !list.isEmpty()) {
-        lastLoadedTiles.clear();
         fileChooser.setInitialDirectory(list.get(0).getParentFile());
-
-        for (File file : list) {
-          Path path = file.toPath();
-          lastLoadedTiles.add(path);
-        }
-
-        updateChildren(borderPane, inputColumnsField, inputRowsField, byTransparencySwitch);
       }
+      updateOnFileChanged(centerGroup, list, inputColumnsField.getText(), inputRowsField.getText(),
+        byTransparencySwitch.isSelected());
     });
 
     Button shuffle = new Button("Shuffle");
     shuffle.setOnAction(e -> {
-      updateChildren(borderPane, inputColumnsField, inputRowsField, byTransparencySwitch);
+      updateChildren(centerGroup, inputColumnsField.getText(), inputRowsField.getText(),
+        byTransparencySwitch.isSelected());
     });
 
 
@@ -98,12 +109,26 @@ public class Layout extends Application {
     primaryStage.show();
   }
 
-  private void updateChildren(BorderPane borderPane, TextField inputColumnsField, TextField inputRowsField,
-                              CheckBox byTransparencySwitch) {
-    Group newTilesGroup = redrawTiles(inputColumnsField, inputRowsField, byTransparencySwitch.isSelected());
-    Group center = (Group) borderPane.getCenter();
+  private void updateOnFileChanged(Group centerGroup, List<File> list, String columnsFieldText, String rowsFieldText,
+                                   boolean transparencySwitchSelected) {
+    if (list != null && !list.isEmpty()) {
+      lastLoadedTiles.clear();
+
+      for (File file : list) {
+        Path path = file.toPath();
+        lastLoadedTiles.add(path);
+      }
+
+      updateChildren(centerGroup, columnsFieldText, rowsFieldText, transparencySwitchSelected);
+    }
+  }
+
+  private void updateChildren(Node borderPaneCenter, String columnsFieldText, String rowsFieldText,
+                              boolean transparencySwitchSelected) {
+    List<Node> tileNodes = redrawTiles(transparencySwitchSelected, columnsFieldText, rowsFieldText);
+    Group center = (Group) borderPaneCenter;
     center.getChildren().clear();
-    center.getChildren().addAll(newTilesGroup.getChildren());
+    center.getChildren().addAll(tileNodes);
   }
 
   private HBox createBoxWith(Label label, TextField inputField) {
@@ -112,7 +137,7 @@ public class Layout extends Application {
     return widthLine;
   }
 
-  private Group redrawTiles(TextField columnsInput, TextField rowsInput, boolean selected) {
+  private List<Node> redrawTiles(boolean selected, String width, String height) {
     tiles.clear();
     for (Path path : lastLoadedTiles) {
       try {
@@ -123,6 +148,6 @@ public class Layout extends Application {
         e1.printStackTrace();
       }
     }
-    return TilesGroup.resizeAndExport(columnsInput.getText(), rowsInput.getText(), tiles).recreateTilesGroup(selected);
+    return TilesGroup.resizeAndExport(width, height, tiles).recreateTilesGroup(selected);
   }
 }

@@ -1,7 +1,6 @@
 package ru.latuhin.salad.gui.demo;
 
 import javafx.application.Application;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.input.TransferMode;

@@ -1,7 +1,8 @@
 package ru.latuhin.salad.gui;
 
-import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -35,17 +36,13 @@ class TilesGroup {
     return new TilesGroup(newWidth, newHeight, tiles);
   }
 
-  Group recreateTilesGroup(boolean useTransparency) {
-    Group root = new Group();
-    if (tiles.isEmpty()) return root;
-
+  List<Node> recreateTilesGroup(boolean useTransparency) {
     final Random[] random = {new Random()};
     Deque<Image> imagesRepo = randomizeTiles(() -> tiles.get(random[0].nextInt(tiles.size())));
-    root.getChildren().add(arrangeTilesGroup(imagesRepo, useTransparency));
-    return root;
+    return arrangeTilesGroup(imagesRepo, useTransparency);
   }
 
-  private Group arrangeTilesGroup(Deque<Image> imagesRepo, boolean useTransparency) {
+  private List<Node> arrangeTilesGroup(Deque<Image> imagesRepo, boolean useTransparency) {
     if (useTransparency) {
       return new ByTransparentSideArranger(tileSize, height, width).arrangeTiles(imagesRepo);
     } else {
